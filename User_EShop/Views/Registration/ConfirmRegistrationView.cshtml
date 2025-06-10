@@ -1,0 +1,12 @@
+﻿@model RegistrationConfirmation
+<form asp-controller="Registration" asp-action="ConfirmRegistration">
+	<div class="mb-3">
+		<label for="registrationConfirmation" class="form-label" asp-for="ConfirmationCode">Code</label>
+		<input type="text" id="registrationConfirmation" class="form-control @(ViewData.ModelState["ConfirmationCode"]?.Errors.Count > 0 ? "is-invalid" : "")" asp-for="ConfirmationCode" />
+		<span asp-validation-for="ConfirmationCode" class="invalid-feedback"></span>
+		<div id="comfirmationText" class="form-text">Please, enter here code sent to you in email</div>
+		<button type="submit" class="btn btn-primary">Submit</button>
+	</div>
+</form>
+
+<p class="lead">After succesfull registration you will be redirected to login page</p>
