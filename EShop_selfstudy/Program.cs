@@ -3,7 +3,6 @@ using EShop_selfstudy.Data;
 using EShop_selfstudy.Data.Interfaces;
 using EShop_selfstudy.Data.Models;
 using EShop_selfstudy.Data.Repository;
-using EShop_selfstudy.Data.Services;
 using Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -52,17 +51,17 @@ namespace EShop_selfstudy
             builder.Logging.AddConsole();
             builder.Logging.AddDebug();
 
-            //HTTP client for JWT token renovation
-            builder.Services.AddHttpClient("AuthClient", client =>
+            //HTTP client for ShoppingCart
+            builder.Services.AddHttpClient("ShoppingCart", client =>
             {
-                client.BaseAddress = new Uri("http://localhost:5090");
+                client.BaseAddress = new Uri("http://localhost:5176");
             });
 
             //Token Refresh Service
             //builder.Services.AddHostedService<TokenRefreshService>();
 
             //JWT Config
-            var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../User_EShop"));
+            var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../User/User_EShop"));
             var config = new ConfigurationBuilder()
                 .SetBasePath(path)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)

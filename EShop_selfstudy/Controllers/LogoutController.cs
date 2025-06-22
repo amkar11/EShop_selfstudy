@@ -18,17 +18,9 @@ namespace EShop_selfstudy.Controllers
         [Route("Logout")]
         public async Task<IActionResult> Logout()
         {
-            string? refresh_token = HttpContext.Request.Cookies["refresh_token"];
-            ArgumentNullException.ThrowIfNull(refresh_token, nameof(refresh_token));
+            
 
-            var values = new Dictionary<string, string>
-            {
-                {"refresh_token", refresh_token }
-            };
-
-            var content = new FormUrlEncodedContent(values);
-
-            var response = await _client.PostAsync("Login/Logout", content);
+            var response = await _client.PostAsync("Login/Logout", null);
 
             if (response.IsSuccessStatusCode)
             {

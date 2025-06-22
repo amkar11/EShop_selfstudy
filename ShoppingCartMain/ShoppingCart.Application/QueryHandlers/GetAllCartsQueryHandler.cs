@@ -1,0 +1,27 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MediatR;
+using ShoppingCart.Domain.Interfaces;
+using ShoppingCart.Domain.Models;
+using ShoppingCart.Domain.Queries;
+
+namespace ShoppingCart.Application.QueryHandlers
+{
+    public class GetAllCartsQueryHandler : IRequestHandler<GetAllCartsQuery, List<Cart>>
+    {
+        private readonly ICartReader _cartReader;
+
+        public GetAllCartsQueryHandler(ICartReader cartReader)
+        {
+            _cartReader = cartReader;
+        }
+
+        public async Task<List<Cart>> Handle(GetAllCartsQuery query, CancellationToken cancellationToken)
+        {
+            return await _cartReader.GetAllCartsAsync(query.userId);
+        }
+    }
+}
