@@ -1,6 +1,11 @@
-﻿using EShop_selfstudy.Data;
+﻿using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
+using EShop_selfstudy.Data;
+using EShop_selfstudy.Data.DTO;
 using EShop_selfstudy.Data.Interfaces;
 using EShop_selfstudy.Data.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop_selfstudy.Controllers
@@ -9,13 +14,13 @@ namespace EShop_selfstudy.Controllers
     public class OrderController : Controller
     {
         private readonly IAllOrders _allOrders;
-        private readonly ShopCart _shopCart;
         private readonly ILogger<OrderController> _logger;
-        public OrderController(IAllOrders allOrders, ShopCart cart, ILogger<OrderController> logger)
+        private readonly HttpClient _client;
+        public OrderController(IAllOrders allOrders, ILogger<OrderController> logger, IHttpClientFactory client)
         {
             _allOrders = allOrders;
-            _shopCart = cart;
             _logger = logger;
+            _client = client.CreateClient("ShoppingCart");
         }
 
         [HttpGet]
@@ -30,16 +35,27 @@ namespace EShop_selfstudy.Controllers
         [Route("Checkout")]
         public async Task<IActionResult> Checkout(Order order)
         {
-            _shopCart.listShopItems = await _shopCart.getShopItemsAsync(order.shopCartId);
-
-            if(!_shopCart.listShopItems.Any())
-            {
-
-                ModelState.AddModelError("", "You must have items in cart");
-            }
-
             if (ModelState.IsValid) { 
                 _allOrders.CreateOrder(order);
+                var user_id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                ArgumentNullException.ThrowIfNull(user_id);
+                var create_cart_dto = new CreateCartDto
+                {
+                    userId = Convert.ToInt32(user_id),
+                    is_checkout = "true"
+                };
+                var json = JsonSerializer.Serialize(create_cart_dto);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _client.PostAsync("api/Cart/create-cart", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Failed to access \"create-cart\" method in Cart controller");
+                    throw new InvalidOperationException("Failed to access \"create-cart\" method in Cart controller");
+                }
+                var cartId = await response.Content.ReadAsStringAsync();
+                Response.Cookies.Append("cartId", cartId);
+
                 return RedirectToAction("Complete");
             }
 

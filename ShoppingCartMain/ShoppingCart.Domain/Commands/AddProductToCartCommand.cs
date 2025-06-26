@@ -10,7 +10,6 @@ namespace ShoppingCart.Domain.Commands
 {
     public class AddProductToCartCommand : IRequest
     {
-        public int cartId { get; set; }
         public ShopCartItem item { get; set; } = default!;
     }
 }

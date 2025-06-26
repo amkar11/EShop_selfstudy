@@ -160,36 +160,6 @@ namespace EShop_selfstudy.Migrations
                     b.ToTable("OrderDetail");
                 });
 
-            modelBuilder.Entity("EShop_selfstudy.Data.Models.ShopCartItem", b =>
-                {
-                    b.Property<int>("shopCartItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("shopCartItemId"));
-
-                    b.Property<int>("carId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("orderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("price")
-                        .HasColumnType("int");
-
-                    b.Property<string>("shopCartId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("shopCartItemId");
-
-                    b.HasIndex("carId");
-
-                    b.HasIndex("orderId");
-
-                    b.ToTable("ShopCartItem");
-                });
-
             modelBuilder.Entity("EShop_selfstudy.Data.Models.Car", b =>
                 {
                     b.HasOne("EShop_selfstudy.Data.Models.Category", "category")
@@ -220,23 +190,6 @@ namespace EShop_selfstudy.Migrations
                     b.Navigation("order");
                 });
 
-            modelBuilder.Entity("EShop_selfstudy.Data.Models.ShopCartItem", b =>
-                {
-                    b.HasOne("EShop_selfstudy.Data.Models.Car", "car")
-                        .WithMany()
-                        .HasForeignKey("carId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EShop_selfstudy.Data.Models.Order", "order")
-                        .WithMany("shopCartItems")
-                        .HasForeignKey("orderId");
-
-                    b.Navigation("car");
-
-                    b.Navigation("order");
-                });
-
             modelBuilder.Entity("EShop_selfstudy.Data.Models.Category", b =>
                 {
                     b.Navigation("Cars");
@@ -245,8 +198,6 @@ namespace EShop_selfstudy.Migrations
             modelBuilder.Entity("EShop_selfstudy.Data.Models.Order", b =>
                 {
                     b.Navigation("order_details");
-
-                    b.Navigation("shopCartItems");
                 });
 #pragma warning restore 612, 618
         }

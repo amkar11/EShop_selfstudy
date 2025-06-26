@@ -1,12 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using AdditionalTools.InMemoryCache;
+using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using User.Application;
-using User.Domain.Models;
-using User.Domain.PasswordHasher;
+using User.Domain.DTO;
 using User.Domain.Repositories;
 using LoginRequest = User.Domain.Models.LoginRequest;
 namespace User_EShop.Controllers
@@ -17,20 +16,17 @@ namespace User_EShop.Controllers
         private readonly ILoginService _loginService;
         private readonly ILogger<LoginController> _logger;
         private readonly IUserRepository _repository;
-        private readonly IHasher _hasher;
         private readonly IJwtTokenValidator _tokenValidator;
-        private readonly ICacheService _cacheService;
+        private readonly HttpClient _client;
 
         public LoginController(ILoginService loginService, ILogger<LoginController> logger,
-            IUserRepository repository, IHasher hasher, IJwtTokenValidator tokenValidator,
-            ICacheService cacheService)
+            IUserRepository repository, IJwtTokenValidator tokenValidator, IHttpClientFactory client)
         {
             _loginService = loginService;
             _logger = logger;
             _repository = repository;
-            _hasher = hasher;
             _tokenValidator = tokenValidator;
-            _cacheService = cacheService;
+            _client = client.CreateClient("ShoppingCart");
         }
 
         [HttpGet]
@@ -54,7 +50,6 @@ namespace User_EShop.Controllers
                     isRemembered = Convert.ToBoolean(isRemembered_string);
                 }
             }
-
 
             if (!string.IsNullOrEmpty(validate_token) && _tokenValidator.IsTokenValid(validate_token) && isRemembered)
             {
@@ -95,9 +90,28 @@ namespace User_EShop.Controllers
             {
                 cookieOptions.Expires = DateTime.UtcNow.AddDays(14);
             }
+            if (Request.Cookies["cartId"] is null)
+            {
+                var create_cart_dto = new CreateCartDto
+                {
+                    userId = user.Id,
+                    is_checkout = null
+                };
+                var json = JsonSerializer.Serialize(create_cart_dto);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _client.PostAsync("api/Cart/create-cart", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Failed to access \"create-cart\" method in Cart controller");
+                    throw new InvalidOperationException("Failed to access \"create-cart\" method in Cart controller");
+                }
+                var cartId = await response.Content.ReadAsStringAsync();
+                Response.Cookies.Append("cartId", cartId, cookieOptions);
+            }
 
             Response.Cookies.Append("access_token", access_token, cookieOptions);
-            _cacheService.SetRefreshTokenAndTimeoutToCache("access_token", access_token);
 
             _logger.LogInformation("User {Username} was succefully logged in", loginRequest.Username);
             return Redirect("http://localhost:5062/");

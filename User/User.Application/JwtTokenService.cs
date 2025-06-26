@@ -38,7 +38,7 @@ namespace User.Application
             claims.Add(new Claim (ClaimTypes.UserData, rememberMe.ToString()));
 
             var rsa = RSA.Create();
-            rsa.ImportFromPem(File.ReadAllText("../data/private.key"));
+            rsa.ImportFromPem(File.ReadAllText("../../data/private.key"));
             var creds = new SigningCredentials(new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
 
             var token = new JwtSecurityToken(

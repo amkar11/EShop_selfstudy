@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MediatR;
 using ShoppingCart.Domain.Models;
 
-namespace ShoppingCart.Domain.Interfaces
+namespace ShoppingCart.Domain.Commands
 {
-    public interface ICartAdder
+    public class UpdateCartCommand : IRequest
     {
-        Task AddProductToCartAsync(int cartId, ShopCartItem product);
+        public Cart cart { get; set; } = default!;
     }
 }

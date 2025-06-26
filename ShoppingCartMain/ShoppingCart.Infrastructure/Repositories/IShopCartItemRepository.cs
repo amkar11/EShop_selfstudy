@@ -11,8 +11,8 @@ namespace ShoppingCart.Infrastructure.Repositories
     {
         Task AddProductToCartAsync(ShopCartItem item);
         Task RemoveProductFromCartAsync(int productId);
-        Task<ShopCartItem> FindProductByIdAsync(int productId);
-        Task<ShopCartItem> FindProductByIdAndCartAsync(int cartId, int productId);
+        Task<ShopCartItem?> FindProductByIdAsync(int productId);
+        Task<ShopCartItem?> FindProductByIdAndCartAsync(int cartId, int productId);
         Task<List<ShopCartItem>> FindAllProductsByCartIdAsync(int cartId);
 
         Task UpdateProductAsync(ShopCartItem item);

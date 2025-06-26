@@ -18,8 +18,12 @@ namespace EShop_selfstudy.Controllers
         [Route("Logout")]
         public async Task<IActionResult> Logout()
         {
+            HttpContext.Session.Clear();
+            foreach(var cookie in HttpContext.Request.Cookies.Keys)
+            {
+                HttpContext.Response.Cookies.Delete(cookie);
+            }
             
-
             var response = await _client.PostAsync("Login/Logout", null);
 
             if (response.IsSuccessStatusCode)

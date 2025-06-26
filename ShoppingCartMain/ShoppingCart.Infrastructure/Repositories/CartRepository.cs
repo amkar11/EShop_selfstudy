@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using ShoppingCart.Domain.Database;
 using ShoppingCart.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ShoppingCart.Infrastructure.Repositories
 {
@@ -19,7 +19,7 @@ namespace ShoppingCart.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task AddCartAsync(int userId, Cart cart)
+        public async Task AddCartAsync(Cart cart)
         {
             await _context.Carts.AddAsync(cart);
             await _context.SaveChangesAsync();
@@ -31,7 +31,7 @@ namespace ShoppingCart.Infrastructure.Repositories
             return carts;
         }
 
-        public async Task<Cart> FindCartByIdAsync(int cartId)
+        public async Task<Cart?> FindCartByIdAsync(int cartId)
         {
             var cart = await _context.Carts.FirstOrDefaultAsync(x => x.cartId == cartId);
             return cart;
@@ -40,7 +40,14 @@ namespace ShoppingCart.Infrastructure.Repositories
         public async Task RemoveCartAsync(int cartId)
         {
             var cart = await FindCartByIdAsync(cartId);
+            ArgumentNullException.ThrowIfNull(cart);
             _context.Carts.Remove(cart);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateCartAsync(Cart cart)
+        {
+            _context.Carts.Update(cart);
             await _context.SaveChangesAsync();
         }
     }

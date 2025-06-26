@@ -9,7 +9,7 @@ namespace ShoppingCart.Domain.Interfaces
 {
     public interface ICartReader
     {
-        Task<Cart> GetCartAsync(int cartId);
+        Task<Cart?> GetCartAsync(int cartId);
         Task<List<Cart>> GetAllCartsAsync(int userId);
     }
 }

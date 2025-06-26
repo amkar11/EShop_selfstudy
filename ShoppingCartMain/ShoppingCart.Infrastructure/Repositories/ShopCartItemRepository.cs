@@ -25,15 +25,15 @@ namespace ShoppingCart.Infrastructure.Repositories
 
         public async Task<List<ShopCartItem>> FindAllProductsByCartIdAsync(int cartId)
         {
-            return await _context.Products.Where(x => x.productId == cartId).ToListAsync();
+            return await _context.Products.Where(x => x.cartId == cartId).ToListAsync();
         }
 
-        public async Task<ShopCartItem> FindProductByIdAsync(int productId)
+        public async Task<ShopCartItem?> FindProductByIdAsync(int productId)
         {
-            return await _context.Products.FindAsync(productId);
+            return await _context.Products.FirstOrDefaultAsync(x => x.productId == productId);
         }
 
-        public async Task<ShopCartItem> FindProductByIdAndCartAsync(int cartId, int productId)
+        public async Task<ShopCartItem?> FindProductByIdAndCartAsync(int cartId, int productId)
         {
             return await _context.Products.FirstOrDefaultAsync(x => x.cartId == cartId && x.productId == productId);
         }
@@ -41,6 +41,7 @@ namespace ShoppingCart.Infrastructure.Repositories
         public async Task RemoveProductFromCartAsync(int productId)
         {
             var item = await FindProductByIdAsync(productId);
+            ArgumentNullException.ThrowIfNull(item);
             _context.Products.Remove(item);
             await _context.SaveChangesAsync();
         }

@@ -10,7 +10,7 @@ using ShoppingCart.Domain.Queries;
 
 namespace ShoppingCart.Application.QueryHandlers
 {
-    public class GetCartQueryHandler : IRequestHandler<GetCartQuery, Cart>
+    public class GetCartQueryHandler : IRequestHandler<GetCartQuery, Cart?>
     {
         private readonly ICartReader _cartReader;
 
@@ -19,7 +19,7 @@ namespace ShoppingCart.Application.QueryHandlers
             _cartReader = cartReader;
         }
 
-        public async Task<Cart> Handle(GetCartQuery query, CancellationToken cancellationToken)
+        public async Task<Cart?> Handle(GetCartQuery query, CancellationToken cancellationToken)
         {
             return await _cartReader.GetCartAsync(query.cartId);
         }

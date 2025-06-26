@@ -14,7 +14,7 @@ namespace EShop_selfstudy.Controllers
         private readonly ILogger<HomeController > _logger;
         string key = "FavouriteCars";
 
-        public HomeController(IAllCars carRep, ICacheService cacheService, ShopCart shopCart,
+        public HomeController(IAllCars carRep, ICacheService cacheService,
             ILogger<HomeController> logger)
         {
             _carRep = carRep;

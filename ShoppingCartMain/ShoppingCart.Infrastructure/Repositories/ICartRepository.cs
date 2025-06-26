@@ -9,9 +9,10 @@ namespace ShoppingCart.Infrastructure.Repositories
 {
     public interface ICartRepository
     {
-        Task AddCartAsync(int userId, Cart cart);
+        Task AddCartAsync(Cart cart);
         Task RemoveCartAsync(int cartId);
-        Task<Cart> FindCartByIdAsync(int cartId);
+        Task<Cart?> FindCartByIdAsync(int cartId);
         Task<List<Cart>> FindAllCartsByUserIdAsync(int userId);
+        Task UpdateCartAsync(Cart cart);
     }
 }

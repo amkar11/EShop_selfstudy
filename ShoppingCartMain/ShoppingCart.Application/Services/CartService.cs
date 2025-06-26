@@ -9,7 +9,8 @@ using ShoppingCart.Infrastructure.Repositories;
 
 namespace ShoppingCart.Application.Services
 {
-    public class CartService : ICartAdder, ICartRemover, ICartReader, IProductQuantityChanger
+    public class CartService : ICartProductAdder, ICartProductRemover, ICartReader,
+        IProductQuantityChanger, ICartCreater, ICartRemover, ICartProductReader, ICartUpdater
     {
         private readonly ICartRepository _cartRepository;
         private readonly IShopCartItemRepository _itemRepository;
@@ -22,15 +23,25 @@ namespace ShoppingCart.Application.Services
 
         public async Task AddProductQuantityAsync(int cartId, int itemId)
         {
-            var item = await _itemRepository.FindProductByIdAndCartAsync(itemId, itemId);
-            item.quantity += 1;
+            var item = await _itemRepository.FindProductByIdAndCartAsync(cartId, itemId);
+            item!.quantity += 1;
             await _itemRepository.UpdateProductAsync(item);
         }
 
-        public async Task AddProductToCartAsync(int cartId, ShopCartItem item)
+        public async Task AddProductToCartAsync(ShopCartItem item)
         {
-            var cart = await GetCartAsync(cartId);
             await _itemRepository.AddProductToCartAsync(item);
+        }
+
+        public async Task CreateCartAsync(int userId)
+        {
+            var cart = new Cart { userId = userId };
+            await _cartRepository.AddCartAsync(cart);
+        }
+
+        public async Task DeleteCartAsync(int cartId)
+        {
+            await _cartRepository.RemoveCartAsync(cartId);
         }
 
         public async Task<List<Cart>> GetAllCartsAsync(int userId)
@@ -38,9 +49,15 @@ namespace ShoppingCart.Application.Services
             return await _cartRepository.FindAllCartsByUserIdAsync(userId);
         }
 
-        public async Task<Cart> GetCartAsync(int cartId)
+        public async Task<List<ShopCartItem>> GetAllItemsFromCartAsync(int cartId)
         {
-            return await _cartRepository.FindCartByIdAsync(cartId);
+            return await _itemRepository.FindAllProductsByCartIdAsync(cartId);
+        }
+
+        public async Task<Cart?> GetCartAsync(int cartId)
+        {
+            var cart = await _cartRepository.FindCartByIdAsync(cartId);
+            return cart;
         }
 
         public async Task RemoveProductFromCartAsync(int cartId, int productId)
@@ -52,8 +69,13 @@ namespace ShoppingCart.Application.Services
         public async Task SubstractProductQuantityAsync(int cartId, int itemId)
         {
             var item = await _itemRepository.FindProductByIdAndCartAsync(cartId, itemId);
-            item.quantity -= 1;
+            item!.quantity -= 1;
             await _itemRepository.UpdateProductAsync(item);
+        }
+
+        public async Task UpdateCartAsync(Cart cart)
+        {
+            await _cartRepository.UpdateCartAsync(cart);
         }
     }
 }

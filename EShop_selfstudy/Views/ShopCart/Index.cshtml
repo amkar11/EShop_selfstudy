@@ -1,10 +1,12 @@
-﻿@model ShopCartViewModel
+﻿@model List<ShopCartViewModel>
 <div class="container" style="margin-top: 3em;">
-	@foreach (var el in Model.shopCart.listShopItems)
+	@foreach (var el in Model)
 	{
 		<div class="alert alert-warning mt-3">
-			<b>Auto: </b> @el.car.name<br />
-			<b>Price: </b> @el.car.price.ToString("c")
+			<b>Auto: @el.name</b> 
+			<b>Description: @el.shortDesc</b>
+			<b>Price: @el.price</b>
+			<b>Quantity: @el.quantity</b>
 		</div>
 	}
 	<hr />

@@ -44,8 +44,6 @@ namespace EShop_selfstudy
             builder.Services.AddSession();
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-            //Shop Cart
-            builder.Services.AddScoped(sp => ShopCart.GetCart(sp));
 
             //Loggers
             builder.Logging.AddConsole();
@@ -57,8 +55,10 @@ namespace EShop_selfstudy
                 client.BaseAddress = new Uri("http://localhost:5176");
             });
 
-            //Token Refresh Service
-            //builder.Services.AddHostedService<TokenRefreshService>();
+            builder.Services.AddHttpClient("AuthClient", client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:5090");
+            });
 
             //JWT Config
             var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../User/User_EShop"));
@@ -94,6 +94,19 @@ namespace EShop_selfstudy
                     ValidAudience = jwtConfig.Audience,
                     IssuerSigningKey = public_key,
                     ClockSkew = TimeSpan.Zero
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var access_token = context.Request.Cookies["access_token"];
+                        if (!string.IsNullOrEmpty(access_token))
+                        {
+                            context.Token = access_token;
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

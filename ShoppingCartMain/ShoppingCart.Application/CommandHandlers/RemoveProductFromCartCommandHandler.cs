@@ -11,8 +11,8 @@ namespace ShoppingCart.Application.CommandHandlers
 {
     public class RemoveProductFromCartCommandHandler : IRequestHandler<RemoveProductFromCartCommand>
     {
-        private readonly ICartRemover _cartRemover;
-        public RemoveProductFromCartCommandHandler(ICartRemover cartRemover)
+        private readonly ICartProductRemover _cartRemover;
+        public RemoveProductFromCartCommandHandler(ICartProductRemover cartRemover)
         {
             _cartRemover = cartRemover;
         }

@@ -57,7 +57,7 @@ namespace User.Application
         public static RsaSecurityKey GetPublicSecurityKey()
         {
             var rsa = RSA.Create();
-            rsa.ImportFromPem(File.ReadAllText("../data/public.key"));
+            rsa.ImportFromPem(File.ReadAllText("../../data/public.key"));
             return new RsaSecurityKey(rsa);
         }
     }

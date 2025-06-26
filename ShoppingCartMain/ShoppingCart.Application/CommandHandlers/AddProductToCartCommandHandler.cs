@@ -13,16 +13,16 @@ namespace ShoppingCart.Application.CommandHandlers
     public class AddProductToCartCommandHandler : IRequestHandler<AddProductToCartCommand>
     {
 
-        private readonly ICartAdder _cartAdder;
+        private readonly ICartProductAdder _cartAdder;
 
-        public AddProductToCartCommandHandler(ICartAdder cartAdder)
+        public AddProductToCartCommandHandler(ICartProductAdder cartAdder)
         {
             _cartAdder = cartAdder;
         }
 
         public async Task Handle(AddProductToCartCommand command, CancellationToken cancellationToken)
         {
-            await _cartAdder.AddProductToCartAsync(command.cartId, command.item);
+            await _cartAdder.AddProductToCartAsync(command.item);
         }
     }
 }

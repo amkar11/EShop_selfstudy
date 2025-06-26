@@ -37,6 +37,11 @@ namespace User_EShop
             //Hasher
             builder.Services.AddTransient<IHasher, Hasher>();
 
+            //ShoppingCart Client
+            builder.Services.AddHttpClient("ShoppingCart", client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:5176");
+            });
 
             //EmailSender
             builder.Services.AddTransient<IEmailSender, EmailSender>();
@@ -93,7 +98,7 @@ namespace User_EShop
                 var config = jwtSettings.Get<JwtSettings>();
 
                 var rsa = RSA.Create();
-                rsa.ImportFromPem(File.ReadAllText("../data/public.key"));
+                rsa.ImportFromPem(File.ReadAllText("../../data/public.key"));
                 var public_key = new RsaSecurityKey(rsa);
                 options.TokenValidationParameters = new TokenValidationParameters
                 {

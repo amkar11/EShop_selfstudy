@@ -13,7 +13,7 @@ namespace ShoppingCart.Domain.Models
         public Guid shopCartItemId { get; set; }
         public int productId { get; set; }
         public int cartId { get; set; }
-        public int quantity { get; set; }
+        public int quantity { get; set; } = 1;
         public Cart cart { get; set; } = default!;
     }
 }

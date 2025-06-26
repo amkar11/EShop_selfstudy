@@ -48,8 +48,6 @@ namespace EShop_selfstudy.Data.Models
         [ScaffoldColumn(false)]
         public string shopCartId { get; set; } = default!;
 
-        public List<ShopCartItem>? shopCartItems { get; set; }
-
         public List<OrderDetail>? order_details { get; set; }
 
     }

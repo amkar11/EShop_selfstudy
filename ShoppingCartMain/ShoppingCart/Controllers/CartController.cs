@@ -1,6 +1,9 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ShoppingCart.Domain.Commands;
+using ShoppingCart.Domain.Database;
+using ShoppingCart.Domain.Dto;
 using ShoppingCart.Domain.Models;
 using ShoppingCart.Domain.Queries;
 
@@ -12,25 +15,49 @@ namespace ShoppingCart.Controllers
     {
         private readonly IMediator _mediator;
         private readonly ILogger<CartController> _logger;
-        public CartController(IMediator mediator, ILogger<CartController> logger)
+        private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
+        public CartController(IMediator mediator, ILogger<CartController> logger, ApplicationDbContext context, IMapper mapper)
         {
             _mediator = mediator;
             _logger = logger;
+            _context = context;
+            _mapper = mapper;
         }
 
         [HttpPost("add-product")]
-        public async Task<IActionResult> AddProductToCart(int cartId, ShopCartItem item)
+        public async Task<IActionResult> AddProductToCart(ShopCartItemDto itemDto)
         {
+            var item = new ShopCartItem
+            {
+                cartId = itemDto.cartId,
+                productId = itemDto.productId
+            };
             var command = new AddProductToCartCommand
             {
-                cartId = cartId,
                 item = item
             };
 
             await _mediator.Send(command);
-            _logger.LogInformation("Product {ProductId} added to cart {CartId}", nameof(item), cartId);
+            _logger.LogInformation("Product {ProductId} added to cart {CartId}", nameof(item), item.cartId);
             return Ok();
         }
+
+        [HttpGet("get-products")]
+        public async Task<IActionResult> GetAllItemsFromCart([FromQuery] int cartId)
+        {
+            var query = new GetAllItemsFromCartQuery { cartId = cartId };
+            var items = await _mediator.Send(query);
+            List<ShopCartDto> response = new List<ShopCartDto>();
+            for (int i = 0; i < items.Count; i++)
+            {
+                response.Add(_mapper.Map<ShopCartDto>(items[i]));
+                
+            }
+            _logger.LogInformation("All items from cart {cartId} successfuly retrieved", cartId);
+            return Ok(response);
+        }
+
         [HttpPost("add-product-quantity")]
         public async Task<IActionResult> AddProductQuantity(int cartId, int productId)
         {
@@ -62,6 +89,39 @@ namespace ShoppingCart.Controllers
             return Ok();
         }
 
+        [HttpPost("create-cart")]
+        public async Task<IActionResult> CreateCart([FromBody] CreateCartDto createCartDto)
+        {
+            try
+            {
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+                var userId = createCartDto.userId;
+                if (createCartDto.is_checkout is not null) {
+                    var get_cart_inactive = new GetAllCartsQuery { userId = userId };
+                    var carts_inactive = await _mediator.Send(get_cart_inactive);
+                    var cart_inactive = carts_inactive.FirstOrDefault(x => x.IsActive == true);
+                    ArgumentNullException.ThrowIfNull(cart_inactive);
+                    cart_inactive.IsActive = false;
+                    var updated_cart = new UpdateCartCommand { cart = cart_inactive };
+                    await _mediator.Send(updated_cart);
+                    _logger.LogInformation($"Successfully changed status of cart to inactive: {cart_inactive.cartId}");
+                }
+                var command = new CreateCartCommand { userId = userId };
+                await _mediator.Send(command);
+                var get_cart = new GetAllCartsQuery { userId = userId };
+                var carts = await _mediator.Send(get_cart);
+                var cart = carts.FirstOrDefault(x => x.IsActive == true);
+                ArgumentNullException.ThrowIfNull(cart);
+                _logger.LogInformation("New cart {cartId} was added to user with following id {userId}", cart.cartId, cart.userId);
+                await transaction.CommitAsync();
+                return Ok(cart.cartId);
+            }
+            catch (Exception ex) 
+            {
+                throw new InvalidOperationException(ex.Message);
+            }
+        }
+
         [HttpGet("get-cart")]
         public async Task<IActionResult> GetCart(int userId, int cartId)
         {
@@ -86,6 +146,17 @@ namespace ShoppingCart.Controllers
             var carts = await _mediator.Send(query);
             _logger.LogInformation("Retrieved all the carts of the user {userId}", userId);
             return Ok(carts);
+        }
+
+        [HttpDelete("delete-cart")]
+        public async Task<IActionResult> DeleteCart([FromQuery] int cartId)
+        {
+            var command = new DeleteCartCommand { cartId = cartId };
+            await _mediator.Send(command);
+            var query = new GetCartQuery { cartId = cartId };
+            var deleted_cart = _mediator.Send(query);
+            _logger.LogInformation("Cart successfully deleted: {deletedCart}", deleted_cart is null);
+            return Ok();
         }
     }
 }

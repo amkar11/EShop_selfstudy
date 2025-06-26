@@ -8,6 +8,6 @@ namespace ShoppingCart.Domain.Interfaces
 {
     public interface ICartRemover
     {
-        Task RemoveProductFromCartAsync(int cartId, int productId);
+        Task DeleteCartAsync(int cartId);
     }
 }
